@@ -1,4 +1,5 @@
 import numpy as np
+from tkinter import *
 
 import matplotlib.pyplot as plt
 from matplotlib import animation, rc
@@ -20,49 +21,33 @@ class ParticleBox:
 		"""step once by dt seconds"""
 		self.time_elapsed += dt
 
-		# update velocity
-		#not_crossed_y = (self.state[:, 1] > 0)
-		#self.state[not_crossed_y, 3] += dt * -9.8
-
-
 		# update positions
 		self.state[:, :2] += dt * self.state[:, 2:]
 
-		# check for crossing boundary
-		#crossed_x1 = (self.state[:, 0] < self.bounds[0] + self.size) indica si cruza ejex
-		#crossed_x2 = (self.state[:, 0] > self.bounds[1] - self.size) indica si cruza ejex
-		#crossed_y1 = (self.state[:, 1] < self.bounds[2] + self.size) indica si cruza eje y
-		#crossed_y2 = (self.state[:, 1] > self.bounds[3] - self.size) indica si cruza eje y
+		mat_tmp = self.state.copy()
 
-		x_p1 = self.state[0, 0]
-		y_p1 = self.state[0, 1]
-		vx_p1 = self.state[0, 2]
-		vy_p1 = self.state[0, 3]
+		
+		for i in range (0, int(self.state.size / 4) ): 
+			x_p = self.state[i, 0]
+			y_p = self.state[i, 1]
+			vx_p = self.state[i, 2]
+			vy_p = self.state[i, 3]
 
-		no_es_x_p1 = self.state[:, 0] != self.state[0, 0]
-		no_es_y_p1 = self.state[:, 1] != self.state[0, 1]
+			no_es_x_p = self.state[:, 0] != self.state[i, 0]
+			no_es_y_p = self.state[:, 1] != self.state[i, 1]
 
-		es_x_p1 = self.state[:, 0] == self.state[0, 0]
-		es_y_p1 = self.state[:, 1] == self.state[0, 1]
+			es_x_p = self.state[:, 0] == self.state[i, 0]
+			es_y_p = self.state[:, 1] == self.state[i, 1]
 
-		choco_X_p1 = (abs(self.state[:, 0] - x_p1)) <= (self.size *2 )
-		choco_Y_p1 = (abs(self.state[:, 1] - y_p1)) <= (self.size *2 )
+			choco_X_p = (abs(self.state[:, 0] - x_p)) <= (self.size *2) 
+			choco_Y_p = (abs(self.state[:, 1] - y_p)) <= (self.size *2 )
 
-		#modifico velocidad de las que chocan con p1, componente x del vector
-		self.state[choco_X_p1 & choco_Y_p1 & no_es_x_p1, 2] = (vx_p1 * -1)
+			#modifico velocidad de las que chocan con p1, componente x del vector, en matriz temporal
+			mat_tmp[choco_X_p & choco_Y_p & no_es_x_p, 2] = (vx_p)
 
+		self.state = mat_tmp.copy()
 
-
-
-		crossed_y = (self.state[:, 1] < 0)
-
-		#self.state[crossed_x1 | crossed_x2, 2] *= -1
-		#self.state[crossed_y1 | crossed_y2, 3] *= -1
-		#self.state[impactoConParticulaUno, 2] =  self.state[0, 2]
-		#self.state[impactoConParticulaDos, 2] =  self.state[1, 2]
-		#self.state[crossed_y, 2] = 0 #lo frena en el eje x
-
-		mat = np.array(self.state)
+		#mat = np.array(self.state)
 
 
 #------------------------------------------------------------
@@ -70,23 +55,23 @@ class ParticleBox:
 init_state = np.zeros((2,4),dtype=float)
 
 #particula 1 
-init_state[0, 0] = 10 #inicio en x
+init_state[0, 0] = 50 #inicio en x
 init_state[0, 1] = 5 # inicio en y
 init_state[0, 2] = 5 #componente de x
 init_state[0, 3] = 0 #componente de y
 
 #particula 2 
-init_state[1, 0] = 20 #inicio en x
-init_state[1, 1] = 0 # inicio en y
-init_state[1, 2] = 0 #componente de x
+init_state[1, 0] = 100 #inicio en x
+init_state[1, 1] = 5 # inicio en y
+init_state[1, 2] = -1 #componente de x
 init_state[1, 3] = 0 #componente de y
 
-box = ParticleBox(init_state, size=2.5)
+box = ParticleBox(init_state, size=0.125)
 dt = 1. / 30 # 30fps
 
 # First set up the figure, the axis, and the plot element we want to animate
 fig = plt.figure()
-ax = plt.axes(xlim=(-10, 300), ylim=(-10, 100))
+ax = plt.axes(xlim=(-10, 300), ylim=(-10, 10))
 particles, = ax.plot([], [], 'bo', ms=5)
 
 # initialization function: plot the background of each frame
