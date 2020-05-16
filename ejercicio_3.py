@@ -1,5 +1,5 @@
 import numpy as np
-from tkinter import *
+
 
 import matplotlib.pyplot as plt
 from matplotlib import animation, rc
@@ -43,11 +43,9 @@ class ParticleBox:
 			choco_Y_p = (abs(self.state[:, 1] - y_p)) <= (self.size *2 )
 
 			#modifico velocidad de las que chocan con p1, componente x del vector, en matriz temporal
-			mat_tmp[choco_X_p & choco_Y_p & no_es_x_p, 2] = (vx_p)
+			mat_tmp[choco_X_p & choco_Y_p & no_es_x_p, 2] = (vx_p * -1)
 
 		self.state = mat_tmp.copy()
-
-		#mat = np.array(self.state)
 
 
 #------------------------------------------------------------
