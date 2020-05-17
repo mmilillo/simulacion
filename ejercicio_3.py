@@ -42,8 +42,10 @@ class ParticleBox:
 			choco_X_p = (abs(self.state[:, 0] - x_p)) <= (self.size *2) 
 			choco_Y_p = (abs(self.state[:, 1] - y_p)) <= (self.size *2)
 
+			puntos_a_modificar = choco_X_p & choco_Y_p & (no_es_x_p | no_es_y_p )
+
 			#modifico velocidad de las que chocan con p1, componente x del vector, en matriz temporal
-			mat_tmp[choco_X_p & choco_Y_p & (no_es_x_p | no_es_y_p ), 2] = (vx_p)
+			mat_tmp[puntos_a_modificar, 2] = (vx_p)
 
 		self.state = mat_tmp.copy()
 

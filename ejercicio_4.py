@@ -45,17 +45,26 @@ class ParticleBox:
 			choco_X_p = (abs(self.state[:, 0] - x_p)) <= (self.size *2) 
 			choco_Y_p = (abs(self.state[:, 1] - y_p)) <= (self.size *2 )
 
-			#punto_a_actualizar = choco_X_p & choco_Y_p & (no_es_x_p | no_es_Y_p )
+			puntos_a_modificar = choco_X_p & choco_Y_p & (no_es_x_p | no_es_y_p )
+
 			### PASO 1 CONSEGUIR LAS COMPONENTES X E Y DE LA NORMAL ###
 
 			#diferencia entre las componentes x de velocidad
-			mat_tmp[choco_X_p & choco_Y_p & (no_es_x_p | no_es_y_p ) , 4] = (self.state[choco_X_p & choco_Y_p & no_es_x_p, 2] -  vx_p)
+			mat_tmp[puntos_a_modificar , 4] = (self.state[puntos_a_modificar, 2] -  vx_p)
 
 			#diferencia entre las componentes y de velocidad
-			mat_tmp[choco_X_p & choco_Y_p & (no_es_x_p | no_es_y_p ) , 5] = (self.state[choco_X_p & choco_Y_p & no_es_x_p, 3] -  vy_p)
+			mat_tmp[puntos_a_modificar , 5] = (self.state[puntos_a_modificar, 3] -  vy_p)
 
 			### PASO 2 CONSEGUIR EL VECTOR UNITARIO NORMAL
-			#mat_tmp[choco_X_p & choco_Y_p & (no_es_x_p | no_es_Y_p ) , 6] = 
+			
+			#valor de squad(x`2 + y`2)
+			mat_tmp[puntos_a_modificar , 6] = squad(self.state[puntos_a_modificar, 4]^[2] +  self.state[puntos_a_modificar, 5]^[2])
+
+			#componente x vector unitario normal
+			mat_tmp[puntos_a_modificar , 7] = mat_tmp[puntos_a_modificar , 4] * mat_tmp[puntos_a_modificar , 6]
+
+			#componente y vector unitario normal
+			mat_tmp[puntos_a_modificar , 8] = mat_tmp[puntos_a_modificar , 5] * mat_tmp[puntos_a_modificar , 6]
 
 		print(mat_tmp)
 
@@ -77,7 +86,7 @@ init_state[1, 1] = 5 # inicio en y
 init_state[1, 2] = -1 #componente de x
 init_state[1, 3] = 0 #componente de y
 
-box = ParticleBox(init_state, size=0.125)
+box = ParticleBox(init_state, size=6)
 dt = 1. / 30 # 30fps
 
 # First set up the figure, the axis, and the plot element we want to animate
