@@ -27,7 +27,7 @@ class ParticleBox:
 		cantidad_listas = int(self.state.size / 4)
 
 		#inicializo matriz temporal
-		mat_tmp = np.zeros((cantidad_listas, 15)) # Matriz de ceros
+		mat_tmp = np.zeros((cantidad_listas, 16)) # Matriz de ceros
 		mat_tmp[:,:4] = self.state[:,:]
 
 		#actualizo estdos
@@ -44,7 +44,7 @@ class ParticleBox:
 			es_y_p = self.state[:, 1] == self.state[i, 1]
 
 			choco_X_p = (abs(self.state[:, 0] - x_p)) <= (self.size *2) 
-			choco_Y_p = (abs(self.state[:, 1] - y_p)) <= (self.size *2 )
+			choco_Y_p = (abs(self.state[:, 1] - y_p)) <= (self.size *2)
 
 			puntos_a_modificar = choco_X_p & choco_Y_p & (no_es_x_p | no_es_y_p )
 
@@ -77,23 +77,25 @@ class ParticleBox:
 			mat_tmp[puntos_a_modificar , 10] = (mat_tmp[puntos_a_modificar , 2] * mat_tmp[puntos_a_modificar , 8]) + (mat_tmp[puntos_a_modificar , 3] * mat_tmp[puntos_a_modificar , 7] * -1)
 
 			### actualizo las velocidades finales depsues del choque
-			# vp = vectarTangencial + normal de la otra particula
+			# vpx = vectarTangencialx + normal de la otra particula x
+			# vpy = vectarTangencialy + normal de la otra particula y
 
 			## vector tangencial (x,y) = Vtp1 (escalar) * vut
 			mat_tmp[puntos_a_modificar , 11] = mat_tmp[puntos_a_modificar , 8] * mat_tmp[puntos_a_modificar , 10] # x tangencial
 			mat_tmp[puntos_a_modificar , 12] = mat_tmp[puntos_a_modificar , 7] * mat_tmp[puntos_a_modificar , 10] * -1 # y tangencial
 
 			## vector normal (va el de la particula con la que choco) = componente normal (escalar) de la particula con la cual choco * Vun
-			mat_tmp[puntos_a_modificar , 13] = mat_tmp[puntos_a_modificar , 7] * mat_tmp[puntos_a_modificar , 9] * -1 # x normal
-			mat_tmp[puntos_a_modificar , 14] = mat_tmp[puntos_a_modificar , 8] * mat_tmp[puntos_a_modificar , 9] * -1 # x normal
 
-			print(mat_tmp)
+			#esto seria la constante
+			mat_tmp[puntos_a_modificar , 13] = (vx_p * mat_tmp[puntos_a_modificar , 7] ) + (vy_p * mat_tmp[puntos_a_modificar , 8])
+			
+			#componente de la velocidad en la direccion normal de la otra particula
+			mat_tmp[puntos_a_modificar , 14] = mat_tmp[puntos_a_modificar , 13] * mat_tmp[puntos_a_modificar , 7] #x
+			mat_tmp[puntos_a_modificar , 15] = mat_tmp[puntos_a_modificar , 13] * mat_tmp[puntos_a_modificar , 8] #y
 
-
-
-
+			mat_tmp[puntos_a_modificar , 2] = mat_tmp[puntos_a_modificar , 11] + mat_tmp[puntos_a_modificar , 14]
+			mat_tmp[puntos_a_modificar , 3] = mat_tmp[puntos_a_modificar , 12] + mat_tmp[puntos_a_modificar , 15]
 		
-
 		self.state = mat_tmp[:,:4]
 
 #------------------------------------------------------------
@@ -102,22 +104,22 @@ init_state = np.zeros((2,4),dtype=float)
 
 #particula 1 
 init_state[0, 0] = 50 #inicio en x
-init_state[0, 1] = 5 # inicio en y
-init_state[0, 2] = 5 #componente de x
-init_state[0, 3] = 0 #componente de y
+init_state[0, 1] = 50 # inicio en y
+init_state[0, 2] = 0 #componente de x
+init_state[0, 3] = 5 #componente de y
 
 #particula 2 
-init_state[1, 0] = 100 #inicio en x
-init_state[1, 1] = 5 # inicio en y
-init_state[1, 2] = -1 #componente de x
-init_state[1, 3] = 0 #componente de y
+init_state[1, 0] = 50 #inicio en x
+init_state[1, 1] = 100 # inicio en y
+init_state[1, 2] = 0 #componente de x
+init_state[1, 3] = -1 #componente de y
 
 box = ParticleBox(init_state, size=6)
 dt = 1. / 30 # 30fps
 
 # First set up the figure, the axis, and the plot element we want to animate
 fig = plt.figure()
-ax = plt.axes(xlim=(-10, 300), ylim=(-10, 10))
+ax = plt.axes(xlim=(-10, 100), ylim=(-300, 300))
 particles, = ax.plot([], [], 'bo', ms=5)
 
 # initialization function: plot the background of each frame
