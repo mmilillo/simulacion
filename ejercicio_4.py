@@ -27,7 +27,7 @@ class ParticleBox:
 		cantidad_listas = int(self.state.size / 4)
 
 		#inicializo matriz temporal
-		mat_tmp = np.zeros((cantidad_listas, 11)) # Matriz de ceros
+		mat_tmp = np.zeros((cantidad_listas, 15)) # Matriz de ceros
 		mat_tmp[:,:4] = self.state[:,:]
 
 		#actualizo estdos
@@ -50,38 +50,49 @@ class ParticleBox:
 
 			### PASO 1 CONSEGUIR LAS COMPONENTES X E Y DE LA NORMAL ###
 
-		#diferencia entre las componentes x de velocidad = componente x de la normal
-			mat_tmp[puntos_a_modificar , 4] = (self.state[puntos_a_modificar, 2] -  vx_p)
-
-			#diferencia entre las componentes y de velocidad = componete y de la normal 
-			mat_tmp[puntos_a_modificar , 5] = (self.state[puntos_a_modificar, 3] -  vy_p)
+			#diferencia entre las componentes velocidad osea la normal
+			mat_tmp[puntos_a_modificar , 4] = (self.state[puntos_a_modificar, 2] -  vx_p) #x
+			mat_tmp[puntos_a_modificar , 5] = (self.state[puntos_a_modificar, 3] -  vy_p) #y
 
 			### PASO 2 CONSEGUIR EL VECTOR UNITARIO NORMAL
 			
-			#valor de squad(xn`2 + yn`2)
+			#la suma de los cuadrados de los componentes de la normal
 			mat_tmp[puntos_a_modificar , 6] = (mat_tmp[puntos_a_modificar, 4] **2 +  mat_tmp[puntos_a_modificar, 5] ** 2)**(1.0/2)
 
-			#componente x vector unitario normal
-			mat_tmp[puntos_a_modificar , 7] = mat_tmp[puntos_a_modificar , 4] / mat_tmp[puntos_a_modificar , 6]
-
-			#componente y vector unitario normal
-			mat_tmp[puntos_a_modificar , 8] = mat_tmp[puntos_a_modificar , 5] / mat_tmp[puntos_a_modificar , 6]
+			#componentes del verctor unitario normal
+			mat_tmp[puntos_a_modificar , 7] = mat_tmp[puntos_a_modificar , 4] / mat_tmp[puntos_a_modificar , 6] #x
+			mat_tmp[puntos_a_modificar , 8] = mat_tmp[puntos_a_modificar , 5] / mat_tmp[puntos_a_modificar , 6] #y
 
 			### PUNTO 3 CONSEGUIR EL VECTOR UNITARIO TANGENCIAL
-			## ES INVERTIR "X" E "Y" DEL UNITARIO NORMAL, Y CAMBIANDO EL SIGNO DE "Y"
+			# mat_tmp[puntos_a_modificar , 8] 		#x
+			# mat_tmp[puntos_a_modificar , 7] *-1 	#y
 
-			### PUNTO 4 CONSEGUIR LOS VECTORES DE VELOCIDAD INICIAL EN COMPONENTE X E Y
+			### PUNTO 4 CONSEGUIR LOS VECTORES DE VELOCIDAD INICIAL EN COMPONENTE X E Y (ya tenemos el dato)
 
-			### PUNTO 5 PROYECCION NORMAL producto escalar, punto, interno
-			## vnp1 = velp1 * Vun = (5,0) * (1,0) = 5
+			### PUNTO 5 PROYECCION NORMAL, es un escalar (multiplicadorNormal = velocidad p * Vun = (5,0) * (1,0) = 5)
 			mat_tmp[puntos_a_modificar , 9] =  (mat_tmp[puntos_a_modificar , 2] * mat_tmp[puntos_a_modificar , 7]) + (mat_tmp[puntos_a_modificar , 3] * mat_tmp[puntos_a_modificar , 8])
 
 
+			### PUNTO 5 PROYECCION tangencial, es un escalar (multiplicadorTangencial = velocidad p * Vtu = (5,0) * (0,-1) = 0)
+			mat_tmp[puntos_a_modificar , 10] = (mat_tmp[puntos_a_modificar , 2] * mat_tmp[puntos_a_modificar , 8]) + (mat_tmp[puntos_a_modificar , 3] * mat_tmp[puntos_a_modificar , 7] * -1)
 
-			### PUNTO 5 PROYECCION tangencial
-			#mat_tmp[puntos_a_modificar , 10] = mat_tmp[puntos_a_modificar , 3] * mat_tmp[puntos_a_modificar , 8]
+			### actualizo las velocidades finales depsues del choque
+			# vp = vectarTangencial + normal de la otra particula
 
-		print(mat_tmp)
+			## vector tangencial (x,y) = Vtp1 (escalar) * vut
+			mat_tmp[puntos_a_modificar , 11] = mat_tmp[puntos_a_modificar , 8] * mat_tmp[puntos_a_modificar , 10] # x tangencial
+			mat_tmp[puntos_a_modificar , 12] = mat_tmp[puntos_a_modificar , 7] * mat_tmp[puntos_a_modificar , 10] * -1 # y tangencial
+
+			## vector normal (va el de la particula con la que choco) = componente normal (escalar) de la particula con la cual choco * Vun
+			mat_tmp[puntos_a_modificar , 13] = mat_tmp[puntos_a_modificar , 7] * mat_tmp[puntos_a_modificar , 9] * -1 # x normal
+			mat_tmp[puntos_a_modificar , 14] = mat_tmp[puntos_a_modificar , 8] * mat_tmp[puntos_a_modificar , 9] * -1 # x normal
+
+			print(mat_tmp)
+
+
+
+
+		
 
 		self.state = mat_tmp[:,:4]
 
