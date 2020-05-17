@@ -2,6 +2,7 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 from matplotlib import animation, rc
+import math
 
 class ParticleBox:
 	def __init__(self,
@@ -20,13 +21,13 @@ class ParticleBox:
 		"""step once by dt seconds"""
 		self.time_elapsed += dt
 
-		# update positions
+		# update positions, el 2 es sin incluir
 		self.state[:, :2] += dt * self.state[:, 2:]
 
 		cantidad_listas = int(self.state.size / 4)
 
 		#inicializo matriz temporal
-		mat_tmp = np.zeros((cantidad_listas, 8)) # Matriz de ceros
+		mat_tmp = np.zeros((cantidad_listas, 11)) # Matriz de ceros
 		mat_tmp[:,:4] = self.state[:,:]
 
 		#actualizo estdos
@@ -49,22 +50,36 @@ class ParticleBox:
 
 			### PASO 1 CONSEGUIR LAS COMPONENTES X E Y DE LA NORMAL ###
 
-			#diferencia entre las componentes x de velocidad
+		#diferencia entre las componentes x de velocidad = componente x de la normal
 			mat_tmp[puntos_a_modificar , 4] = (self.state[puntos_a_modificar, 2] -  vx_p)
 
-			#diferencia entre las componentes y de velocidad
+			#diferencia entre las componentes y de velocidad = componete y de la normal 
 			mat_tmp[puntos_a_modificar , 5] = (self.state[puntos_a_modificar, 3] -  vy_p)
 
 			### PASO 2 CONSEGUIR EL VECTOR UNITARIO NORMAL
 			
-			#valor de squad(x`2 + y`2)
-			mat_tmp[puntos_a_modificar , 6] = squad(self.state[puntos_a_modificar, 4]^[2] +  self.state[puntos_a_modificar, 5]^[2])
+			#valor de squad(xn`2 + yn`2)
+			mat_tmp[puntos_a_modificar , 6] = (mat_tmp[puntos_a_modificar, 4] **2 +  mat_tmp[puntos_a_modificar, 5] ** 2)**(1.0/2)
 
 			#componente x vector unitario normal
-			mat_tmp[puntos_a_modificar , 7] = mat_tmp[puntos_a_modificar , 4] * mat_tmp[puntos_a_modificar , 6]
+			mat_tmp[puntos_a_modificar , 7] = mat_tmp[puntos_a_modificar , 4] / mat_tmp[puntos_a_modificar , 6]
 
 			#componente y vector unitario normal
-			mat_tmp[puntos_a_modificar , 8] = mat_tmp[puntos_a_modificar , 5] * mat_tmp[puntos_a_modificar , 6]
+			mat_tmp[puntos_a_modificar , 8] = mat_tmp[puntos_a_modificar , 5] / mat_tmp[puntos_a_modificar , 6]
+
+			### PUNTO 3 CONSEGUIR EL VECTOR UNITARIO TANGENCIAL
+			## ES INVERTIR "X" E "Y" DEL UNITARIO NORMAL, Y CAMBIANDO EL SIGNO DE "Y"
+
+			### PUNTO 4 CONSEGUIR LOS VECTORES DE VELOCIDAD INICIAL EN COMPONENTE X E Y
+
+			### PUNTO 5 PROYECCION NORMAL producto escalar, punto, interno
+			## vnp1 = velp1 * Vun = (5,0) * (1,0) = 5
+			mat_tmp[puntos_a_modificar , 9] =  (mat_tmp[puntos_a_modificar , 2] * mat_tmp[puntos_a_modificar , 7]) + (mat_tmp[puntos_a_modificar , 3] * mat_tmp[puntos_a_modificar , 8])
+
+
+
+			### PUNTO 5 PROYECCION tangencial
+			#mat_tmp[puntos_a_modificar , 10] = mat_tmp[puntos_a_modificar , 3] * mat_tmp[puntos_a_modificar , 8]
 
 		print(mat_tmp)
 
