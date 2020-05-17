@@ -107,8 +107,3 @@ anim = animation.FuncAnimation(fig, animate, init_func=init,
 rc('animation', html='jshtml')
 anim
 plt.show()
-
-
-
-
-

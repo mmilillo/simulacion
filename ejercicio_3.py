@@ -26,7 +26,7 @@ class ParticleBox:
 
 		mat_tmp = self.state.copy()
 
-		
+		print(mat_tmp)
 		for i in range (0, int(self.state.size / 4) ): 
 			x_p = self.state[i, 0]
 			y_p = self.state[i, 1]
@@ -40,10 +40,10 @@ class ParticleBox:
 			es_y_p = self.state[:, 1] == self.state[i, 1]
 
 			choco_X_p = (abs(self.state[:, 0] - x_p)) <= (self.size *2) 
-			choco_Y_p = (abs(self.state[:, 1] - y_p)) <= (self.size *2 )
+			choco_Y_p = (abs(self.state[:, 1] - y_p)) <= (self.size *2)
 
 			#modifico velocidad de las que chocan con p1, componente x del vector, en matriz temporal
-			mat_tmp[choco_X_p & choco_Y_p & no_es_x_p, 2] = (vx_p * -1)
+			mat_tmp[choco_X_p & choco_Y_p & (no_es_x_p | no_es_y_p ), 2] = (vx_p)
 
 		self.state = mat_tmp.copy()
 
@@ -53,24 +53,25 @@ class ParticleBox:
 init_state = np.zeros((2,4),dtype=float)
 
 #particula 1 
-init_state[0, 0] = 50 #inicio en x
+init_state[0, 0] = 0 #inicio en x
 init_state[0, 1] = 5 # inicio en y
-init_state[0, 2] = 5 #componente de x
+init_state[0, 2] = 50 #componente de x
 init_state[0, 3] = 0 #componente de y
 
 #particula 2 
-init_state[1, 0] = 100 #inicio en x
+init_state[1, 0] = 250 #inicio en x
 init_state[1, 1] = 5 # inicio en y
-init_state[1, 2] = -1 #componente de x
+init_state[1, 2] = -5 #componente de x
 init_state[1, 3] = 0 #componente de y
 
-box = ParticleBox(init_state, size=0.125)
+box = ParticleBox(init_state, size=6)
 dt = 1. / 30 # 30fps
 
 # First set up the figure, the axis, and the plot element we want to animate
 fig = plt.figure()
 ax = plt.axes(xlim=(-10, 300), ylim=(-10, 10))
 particles, = ax.plot([], [], 'bo', ms=5)
+
 
 # initialization function: plot the background of each frame
 def init():
