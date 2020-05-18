@@ -112,7 +112,7 @@ class ParticleBox:
 # set up initial state
 init_state = np.zeros((20,4),dtype=float)
 
-for i in range (0,20):
+for i in range (0,19):
 	init_state[i, 0] = random.randint(-250,250) #inicio en x
 	init_state[i, 1] = random.randint(-250,250) # inicio en y
 	init_state[i, 2] = random.randint(-100,100) #componente de x
