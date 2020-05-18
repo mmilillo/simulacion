@@ -3,13 +3,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import animation, rc
 import math
+import random
 
 class ParticleBox:
 	def __init__(self,
 				 init_state = [[1, 0, 0, -1],
 							   [-0.5, 0.5, 0.5, 0.5],
 							   [-0.5, -0.5, -0.5, 0.5]],
-				 bounds = [-10, 1000, -10, 200],
+				 bounds = [-300, 300, -300, 300],
 				 size = 0.04):
 		self.init_state = np.asarray(init_state, dtype=float)
 		self.size = size
@@ -98,28 +99,33 @@ class ParticleBox:
 		
 		self.state = mat_tmp[:,:4]
 
+		# check for crossing boundary
+		crossed_x1 = (self.state[:, 0] < self.bounds[0] + self.size)
+		crossed_x2 = (self.state[:, 0] > self.bounds[1] - self.size)
+		crossed_y1 = (self.state[:, 1] < self.bounds[2] + self.size)
+		crossed_y2 = (self.state[:, 1] > self.bounds[3] - self.size)
+
+		self.state[crossed_x1 | crossed_x2, 2] *= -1
+		self.state[crossed_y1 | crossed_y2, 3] *= -1
+
 #------------------------------------------------------------
 # set up initial state
-init_state = np.zeros((2,4),dtype=float)
+init_state = np.zeros((20,4),dtype=float)
 
-#particula 1 
-init_state[0, 0] = 50 #inicio en x
-init_state[0, 1] = 50 # inicio en y
-init_state[0, 2] = 0 #componente de x
-init_state[0, 3] = 5 #componente de y
+for i in range (0,20):
+	init_state[i, 0] = random.randint(-250,250) #inicio en x
+	init_state[i, 1] = random.randint(-250,250) # inicio en y
+	init_state[i, 2] = random.randint(-100,100) #componente de x
+	init_state[i, 3] = random.randint(-100,100) #componente de y
 
-#particula 2 
-init_state[1, 0] = 50 #inicio en x
-init_state[1, 1] = 100 # inicio en y
-init_state[1, 2] = 0 #componente de x
-init_state[1, 3] = -1 #componente de y
+
 
 box = ParticleBox(init_state, size=6)
 dt = 1. / 30 # 30fps
 
 # First set up the figure, the axis, and the plot element we want to animate
 fig = plt.figure()
-ax = plt.axes(xlim=(-10, 100), ylim=(-300, 300))
+ax = plt.axes(xlim=(-300, 300), ylim=(-300, 300))
 particles, = ax.plot([], [], 'bo', ms=5)
 
 # initialization function: plot the background of each frame
