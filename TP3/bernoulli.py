@@ -4,15 +4,25 @@ import matplotlib.pyplot as plt
 
 ### DISTRIBUCION UNIFORME ###
 
-def calcularBernoulli():
-    num = np.random.random_sample() * 10
-    if num > 5:
+def calcularBernoulli(p):
+    if p < 0 or p > 100:
+        return Exception
+
+    num = np.random.random_sample() * 100 
+
+    if p <= num: 
         return 1
     else:
-        return calcularBernoulli() + 1
-        
-x = resultados
+        return 0
+
+resultados = np.zeros((10000),dtype=int)
+
+p = 30
+
+for x in range(0, resultados.size):
+    resultados[x] = calcularBernoulli(p)
+
 print(x)
 num_bins = 50
-n, bins, patches = plt.hist(x, num_bins, facecolor='blue', alpha=0.5)
+n, bins, patches = plt.hist(resultados, num_bins, facecolor='blue', alpha=0.5)
 plt.show()
