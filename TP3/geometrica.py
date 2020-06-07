@@ -2,26 +2,38 @@ import numpy as np
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 
-### DISTRIBUCION GEOMETRICA ###
 
-def geometrica():
-    return calcularBernoulli()
+#bernulli
+def calcularBernoulli(p):
+    if p < 0 or p > 100:
+        return Exception
 
-def calcularBernoulli():
-    num = np.random.random_sample() * 10
-    if num > 5:
+    num = np.random.random_sample() * 100 
+
+    if num <= p: 
         return 1
     else:
-        return calcularBernoulli() + 1
+        return 0
+
+### DISTRIBUCION GEOMETRICA ###
+
+def calcularGeometrica(p):
+    resultado = calcularBernoulli(p)
+    if resultado == 1:
+        return 1
+    else:
+        return  calcularGeometrica(p) + 1
                     
 
-resultados = np.zeros((10000),dtype=int)
+resultados = np.zeros((100000),dtype=int)
 
 for x in range(0, resultados.size):
-    resultados[x] = geometrica()
+    resultados[x] = calcularGeometrica(30)
 
-x = resultados
-print(x)
+print(resultados)    
+
+
+
 num_bins = 50
-n, bins, patches = plt.hist(x, num_bins, facecolor='blue', alpha=0.5)
+n, bins, patches = plt.hist(resultados, num_bins, facecolor='blue', alpha=0.5)
 plt.show()

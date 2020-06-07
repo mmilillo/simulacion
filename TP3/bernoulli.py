@@ -10,7 +10,7 @@ def calcularBernoulli(p):
 
     num = np.random.random_sample() * 100 
 
-    if p <= num: 
+    if num <= p: 
         return 1
     else:
         return 0
