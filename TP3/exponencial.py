@@ -10,9 +10,9 @@ def calcularExponencial(lan):
     resultado = ( (- 1 / lan) * (math.log( 1 - num)))
     return resultado
 
-resultados = np.zeros((1000),dtype=float)
+resultados = np.zeros((10000),dtype=float)
 
-lan = 2
+lan = 5
 
 for x in range(0, resultados.size):
     resultados[x] = calcularExponencial(lan)
