@@ -43,7 +43,7 @@ class Sistema:
                 self.tiempoGlobal = 0
                 self.tasaLlegadaClientes = fTasaLlegadaClientes
                 self.tasasAtencionServidores = vfTasasAtencionServidores
-                self.colaClientes = []
+                self.colaClientes = Cola()
                 self.listaServidores = []
                 self.creacionServidores()    
                 self.bolsaEventos = []
@@ -51,8 +51,8 @@ class Sistema:
 
 	def creacionServidores(self):
 	        # crea la lista de servidores respetando la respectivas tasa de 
-                for x in range(len(self.tasasAtencionServidores)):
-                        self.listaServidores.append(Servidor(self.tasasAtencionServidores[x]))
+                for x in self.tasasAtencionServidores:
+                        self.listaServidores.append(Servidor(x))
 
 	
 	def crearEventoProximoCliente(self): 
@@ -71,7 +71,7 @@ class Sistema:
                 # 4) agrega el evento a la bolsa de eventos
                 print(self.tiempoGlobal)
                 cliente = Cliente(self.tiempoGlobal)
-                self.colaClientes.append(cliente)
+                self.colaClientes.llegaCliente(cliente)
                 self.crearEventoProximoCliente()
 
 	def avanzarTiempo(self, fTiempo): 
@@ -82,10 +82,11 @@ class Sistema:
                 self.crearEventoProximoCliente() # 1) crea el eventoProximoCliente del 1er. cliente
                 while(True):
                         evento = heapq.heappop(self.bolsaEventos) # 2) saca el proximo evento de la bolsa de eventos
+                        self.avanzarTiempo(evento.instanteDeTiempoEnQueOcurre)
                         evento.procesar() # 3) procesa el evento (via polimorfismo)
                         for s in self.listaServidores: #4) for s in self.servidores
-                                if (not s.estaOcupado()) and len(self.colaClientes) > 0  :# 5) si el servidor esta desocupado y hay algun cliente en la cola
-                                        cliente = self.colaClientes.pop(0) # 6) desencolar el primer cliente de la cola
+                                if (not s.estaOcupado()) and self.colaClientes.cantClientes() > 0  :# 5) si el servidor esta desocupado y hay algun cliente en la cola
+                                        cliente = self.colaClientes.proximoCliente() # 6) desencolar el primer cliente de la cola
                                         eventoFinAtencion = s.inicioAtencion(self.tiempoGlobal,cliente) # 7) llama al metodo servidor.inicioAtencion
                                         heapq.heappush(self.bolsaEventos, eventoFinAtencion) # 8) agregar a la bolsa de eventos el evento de FinAtencion
 
@@ -97,7 +98,8 @@ class Servidor:
 	        # inicializa variables
                 self.tasaAtencionServer = fTasaAtencionServidor
                 self.ocupado = False
-                self.tiempoSalidaCliente = 0
+                self.cliente = None
+
 		
 	def estaOcupado(self):
                 # flag: devuelve "true" si el servidor esta ocupado, y "false" si no
@@ -111,16 +113,17 @@ class Servidor:
                 # setea el tiempo de inicio atencion del cliente
                 # crea y devuelve el EventoFinAtencion
                 self.ocupado = True
+                self.cliente = cCliente
                 cCliente.setTiempoInicioAtencion(fTiempoGlobal)
                 print('se esta atendiendo cliente')
-                return EventoFinAtencion(fTiempoGlobal + self.tasaAtencionServer, self)
+                return EventoFinAtencion(fTiempoGlobal + distribucionExponencial(self.tasaAtencionServer), self)
 
 
 	def finAtencion(self,fTiempo):
                 # callback para EventoFinAtencion.procesar
                 # setea el tiempo de salida del cliente
                 # setea la servidor es desocupado
-                self.tiempoSalidaCliente = fTiempo
+                self.cliente.setTiempoSalida(fTiempo)
                 self.ocupado = False
                 print('se atendio cliente')
 
@@ -140,7 +143,7 @@ class Cola:
 		
 	def proximoCliente(self):
 	        # devuelve el primer cliente de la cola (si hay alguno)
-                return self.colaDeCliente.pop()
+                return self.colaDeCliente.pop(0)
 
 # clase base de los eventos 	
 class Evento:
@@ -183,7 +186,6 @@ class EventoProximoCliente(Evento):
 	
 	def procesar(self):
 	        # llama al callback sistema.ingresoCliente()
-                self.sistema.avanzarTiempo(self.instanteDeTiempoEnQueOcurre) 
                 print('llego cliente')
                 self.sistema.ingresoCliente()
       
