@@ -47,7 +47,27 @@ class Sistema:
                 self.listaServidores = []
                 self.creacionServidores()    
                 self.bolsaEventos = []
+
+                #metodos agregados para la parte 2
+                self.clientesAtendidos = 0
+                self.acumuladorTiempoClientesEnCola = 0
+                self.acumuladorTiempoClientesEnSistema = 0
+                ########
+
                 heapq.heapify(self.bolsaEventos)
+
+        #metodods agregados para a aprte 2
+	def cantidadActualClientesEnCola(self):
+                return self.colaClientes.cantClientes
+        
+	def cantidadActualClientesEnSistema(self):
+                servidoresOcupados = 0
+                for servidor in self.listaServidores:
+                        if (servidor.estaOcupado()):
+                                servidoresOcupados = servidoresOcupados + 1
+
+                return self.colaClientes.cantClientes + servidoresOcupados
+        ####
 
 	def creacionServidores(self):
 	        # crea la lista de servidores respetando la respectivas tasa de 
@@ -88,6 +108,11 @@ class Sistema:
                                 if (not s.estaOcupado()) and self.colaClientes.cantClientes() > 0  :# 5) si el servidor esta desocupado y hay algun cliente en la cola
                                         cliente = self.colaClientes.proximoCliente() # 6) desencolar el primer cliente de la cola
                                         eventoFinAtencion = s.inicioAtencion(self.tiempoGlobal,cliente) # 7) llama al metodo servidor.inicioAtencion
+
+                                        #agregado para parte 2
+                                        acumuladorTiempoClientesEnCola = acumuladorTiempoClientesEnCola + (cliente.tiempoInicioAtencion - cliente.tiempoDeLlegada)
+                                        ##
+
                                         heapq.heappush(self.bolsaEventos, eventoFinAtencion) # 8) agregar a la bolsa de eventos el evento de FinAtencion
 
 
@@ -175,6 +200,9 @@ class EventoFinAtencion(Evento):
 	def procesar(self):
 	        # llama a servidor.finAtencion
                 self.servidor.finAtencion(self.instanteDeTiempoEnQueOcurre)
+                cliente = self.servidor.cliente
+                tiempoEnSistemaDelCliente = cliente.tiempoSalida - cliente.tiempoDeLlegada
+                self.servidor.acumuladorTiempoClientesEnSistema = self.servidor.acumuladorTiempoClientesEnSistema + tiempoEnSistemaDelCliente
 
 #evento correspondiente a la futura llegada del proximo cliente
 class EventoProximoCliente(Evento):
@@ -191,5 +219,5 @@ class EventoProximoCliente(Evento):
       
 ##arranca todo
 #las personas llegan en promedio 2 por minuto, landa = 1/2
-sistema = Sistema(0.5,[2,1.5,3])
-sistema.procesar()
+#sistema = Sistema(0.5,[2,1.5,3])
+#sistema.procesar()

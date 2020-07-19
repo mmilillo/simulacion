@@ -9,6 +9,7 @@
 #	i: int
 #	v*: vector o lista de tipo *
 #   c: instancia de una clase
+import TP4P1
 
 class Estadistica:
 	def __init__(self):
@@ -50,4 +51,10 @@ class Estadistica:
 	def Lq(self,cola):
 		return self.cantidadClientesTotalEnCola / self.cantMediciones
 		#Lq: promedio de clientes en la cola
+	
+	def procesar(self, sistema):
+		self.tiempoTotalClientesEnSistema = self.tiempoTotalClientesEnSistema + sistema.acumuladorTiempoClientesEnSistema
+		self.tiempoTotalClientesEnCola = self.tiempoTotalClientesEnCola + sistema.acumuladorTiempoClientesEnCola
+
+
 	

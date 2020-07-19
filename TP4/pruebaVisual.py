@@ -4,9 +4,11 @@
 import time
 import curses
 from curses import wrapper
+import TP4P1
+import TCparte2
 
 #inicialize curses
-stdscra = curses.initscr()
+#stdscra = curses.initscr()
 
 def imprimirTitulo(screen):
 	screen.addstr(0,0,'Servidores (X = ocupado, " " = desocupado)')
@@ -51,9 +53,19 @@ def actualizarEstadoServidores(screen,ocupado):
 
 def iniciar(screen):
 	#1) inicialización de variables	
+
+	arrayServidores = []
+	for i in range(100):
+		arrayServidores.append(5)
+
 	#2.1) crear instancia de estadistica
+	estadistica = TCparte2.Estadistica()
+
 	#2.2) crear instancia de sistema	
+	sistema = TP4P1.Sistema(0.5,arrayServidores)
+
 	#3) llegada 1er. cliente
+	sistema.ingresoCliente()
 
 	imprimirTitulo(screen)	
 
@@ -65,9 +77,9 @@ def iniciar(screen):
 	while(not terminar):
 		screen.nodelay(True)
 
-		#sistema.procesar()
+		sistema.procesar()
 
-		#estadistica.procesar()	
+		estadistica.procesar(sistema)	
 
 		actualizarEstadoServidores(screen,i % 2 == 0)
 		
