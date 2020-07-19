@@ -5,8 +5,12 @@ import time
 import curses
 from curses import wrapper
 
+#inicialize curses
+stdscra = curses.initscr()
+
 def imprimirTitulo(screen):
 	screen.addstr(0,0,'Servidores (X = ocupado, " " = desocupado)')
+	print("prueba")
 	
 def imprimirDatos(screen):
 	servidores = 100
