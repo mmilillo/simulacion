@@ -84,9 +84,10 @@ def iniciar(screen):
 
 		estadistica.procesar(sistema)	
 
+		imprimirDatos(screen, estadistica, sistema)
+
 		actualizarEstadoServidores(screen,sistema.listaServidores)
 		
-		imprimirDatos(screen, estadistica, sistema)
 
 		time.sleep(0.5)
 		
