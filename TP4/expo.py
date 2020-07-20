@@ -12,7 +12,7 @@ def calcularExponencial(lan):
 
 resultados = np.zeros((10000),dtype=float)
 
-lan = 0.5
+lan = 0.2
 
 for x in range(0, resultados.size):
     resultados[x] = calcularExponencial(lan)

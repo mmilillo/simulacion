@@ -49,16 +49,17 @@ class Sistema:
                 self.bolsaEventos = []
 
                 #metodos agregados para la parte 2
-                self.clientesAtendidos = 0
-                self.acumuladorTiempoClientesEnCola = 0
                 self.acumuladorTiempoClientesEnSistema = 0
+                self.acumuladorTiempoClientesEnCola = 0
+                self.clientesAtendidos = 0
+                self.cantClientesQueEsperaron = 0
                 ########
 
                 heapq.heapify(self.bolsaEventos)
 
         #metodods agregados para a aprte 2
 	def cantidadActualClientesEnCola(self):
-                return self.colaClientes.cantClientes
+                return self.colaClientes.cantClientes()
         
 	def cantidadActualClientesEnSistema(self):
                 servidoresOcupados = 0
@@ -66,13 +67,13 @@ class Sistema:
                         if (servidor.estaOcupado()):
                                 servidoresOcupados = servidoresOcupados + 1
 
-                return self.colaClientes.cantClientes + servidoresOcupados
+                return self.colaClientes.cantClientes() + servidoresOcupados
         ####
 
 	def creacionServidores(self):
 	        # crea la lista de servidores respetando la respectivas tasa de 
                 for x in self.tasasAtencionServidores:
-                        self.listaServidores.append(Servidor(x))
+                        self.listaServidores.append(Servidor(x, self))
 
 	
 	def crearEventoProximoCliente(self): 
@@ -100,30 +101,32 @@ class Sistema:
 		
 	def procesar(self):
                 self.crearEventoProximoCliente() # 1) crea el eventoProximoCliente del 1er. cliente
-                while(True):
-                        evento = heapq.heappop(self.bolsaEventos) # 2) saca el proximo evento de la bolsa de eventos
-                        self.avanzarTiempo(evento.instanteDeTiempoEnQueOcurre)
-                        evento.procesar() # 3) procesa el evento (via polimorfismo)
-                        for s in self.listaServidores: #4) for s in self.servidores
-                                if (not s.estaOcupado()) and self.colaClientes.cantClientes() > 0  :# 5) si el servidor esta desocupado y hay algun cliente en la cola
-                                        cliente = self.colaClientes.proximoCliente() # 6) desencolar el primer cliente de la cola
-                                        eventoFinAtencion = s.inicioAtencion(self.tiempoGlobal,cliente) # 7) llama al metodo servidor.inicioAtencion
+                #while(True):
+                evento = heapq.heappop(self.bolsaEventos) # 2) saca el proximo evento de la bolsa de eventos
+                self.avanzarTiempo(evento.instanteDeTiempoEnQueOcurre)
+                evento.procesar() # 3) procesa el evento (via polimorfismo)
+                for s in self.listaServidores: #4) for s in self.servidores
+                        if (not s.estaOcupado()) and self.colaClientes.cantClientes() > 0  :# 5) si el servidor esta desocupado y hay algun cliente en la cola
+                                cliente = self.colaClientes.proximoCliente() # 6) desencolar el primer cliente de la cola
+                                eventoFinAtencion = s.inicioAtencion(self.tiempoGlobal,cliente) # 7) llama al metodo servidor.inicioAtencion
 
-                                        #agregado para parte 2
-                                        acumuladorTiempoClientesEnCola = acumuladorTiempoClientesEnCola + (cliente.tiempoInicioAtencion - cliente.tiempoDeLlegada)
-                                        ##
+                                #agregado para parte 2
+                                self.acumuladorTiempoClientesEnCola = self.acumuladorTiempoClientesEnCola + (cliente.tiempoInicioAtencion - cliente.tiempoDeLlegada)
+                                self.cantClientesQueEsperaron = self.cantClientesQueEsperaron + 1
+                                ##
 
-                                        heapq.heappush(self.bolsaEventos, eventoFinAtencion) # 8) agregar a la bolsa de eventos el evento de FinAtencion
+                                heapq.heappush(self.bolsaEventos, eventoFinAtencion) # 8) agregar a la bolsa de eventos el evento de FinAtencion
 
 
 
 	
 class Servidor:
-	def __init__(self,fTasaAtencionServidor):
+	def __init__(self,fTasaAtencionServidor, sistema):
 	        # inicializa variables
                 self.tasaAtencionServer = fTasaAtencionServidor
                 self.ocupado = False
                 self.cliente = None
+                self.sistema = sistema
 
 		
 	def estaOcupado(self):
@@ -200,9 +203,12 @@ class EventoFinAtencion(Evento):
 	def procesar(self):
 	        # llama a servidor.finAtencion
                 self.servidor.finAtencion(self.instanteDeTiempoEnQueOcurre)
+
+                # agregado para segunda parte del tp
                 cliente = self.servidor.cliente
                 tiempoEnSistemaDelCliente = cliente.tiempoSalida - cliente.tiempoDeLlegada
-                self.servidor.acumuladorTiempoClientesEnSistema = self.servidor.acumuladorTiempoClientesEnSistema + tiempoEnSistemaDelCliente
+                self.servidor.sistema.acumuladorTiempoClientesEnSistema += tiempoEnSistemaDelCliente
+                self.servidor.sistema.clientesAtendidos += 1
 
 #evento correspondiente a la futura llegada del proximo cliente
 class EventoProximoCliente(Evento):

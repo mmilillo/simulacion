@@ -27,7 +27,7 @@ class Estadistica:
 
 		#agregado por mi
 		# cada determinada cantidad de pasadas sumo cuantos habia en el sistema
-		self.CantidadTotalClientesTotalEnSistema = 0
+		self.cantidadTotalClientesTotalEnSistema = 0
 
 		#agregado por mi
 		# cada determinada cantidad de pasadas sumo cuantos habia en la cola
@@ -37,24 +37,39 @@ class Estadistica:
 		self.cantMediciones = 0
 		
 	def W(self):
-		return self.tiempoTotalClientesEnSistema / self.cantClientesAtendidos
+		if self.cantClientesAtendidos > 0:
+			return self.tiempoTotalClientesEnSistema / self.cantClientesAtendidos
+		else:
+			return 0
 		#W: tiempo promedio que paso un cliente en el sistema
 		
 	def Wq(self):
-		return self.tiempoTotalClientesEnCola / self.cantClientesQueEsperaron
+		if self.cantClientesQueEsperaron > 0:
+			return self.tiempoTotalClientesEnCola / self.cantClientesQueEsperaron
+		else:
+			return 0
 		#Wq: tiempo promedio que paso un cliente en la cola
 		
-	def L(self, sistema):
-		return self.CantidadTotalClientesTotalEnSistema / self.cantMediciones
+	def L(self):
+		return self.cantidadTotalClientesTotalEnSistema / self.cantMediciones
 		#L: promedio de clientes en el sistema
 		
-	def Lq(self,cola):
+	def Lq(self):
 		return self.cantidadClientesTotalEnCola / self.cantMediciones
 		#Lq: promedio de clientes en la cola
 	
 	def procesar(self, sistema):
+		self.cantMediciones += 1
+
 		self.tiempoTotalClientesEnSistema = self.tiempoTotalClientesEnSistema + sistema.acumuladorTiempoClientesEnSistema
 		self.tiempoTotalClientesEnCola = self.tiempoTotalClientesEnCola + sistema.acumuladorTiempoClientesEnCola
+
+		self.cantClientesAtendidos = self.cantClientesAtendidos + sistema.clientesAtendidos
+		self.cantClientesQueEsperaron = self.cantClientesQueEsperaron + sistema.cantClientesQueEsperaron
+
+		self.cantidadTotalClientesTotalEnSistema += sistema.cantidadActualClientesEnSistema()
+		self.cantidadClientesTotalEnCola += sistema.cantidadActualClientesEnCola()
+
 
 
 	

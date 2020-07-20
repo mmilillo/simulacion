@@ -14,7 +14,7 @@ def imprimirTitulo(screen):
 	screen.addstr(0,0,'Servidores (X = ocupado, " " = desocupado)')
 	print("prueba")
 	
-def imprimirDatos(screen):
+def imprimirDatos(screen, estadistica, sistema):
 	servidores = 100
 	
 	fila = 1
@@ -27,21 +27,22 @@ def imprimirDatos(screen):
 		else:
 			fila += 1
 		
-	screen.addstr(22,0,'Cantidad de clientes en espera (en la cola): {}'.format("???"))
-	screen.addstr(23,0,'Cantidad de mediciones: {}'.format("???"))
-	screen.addstr(24,0,'Tiempo global: {}'.format("???"))
-	screen.addstr(26,0,'L: {}'.format("???"))
-	screen.addstr(27,0,'Lq: {}'.format("???"))
-	screen.addstr(26,50,'W: {}'.format("???"))
-	screen.addstr(27,50,'Wq: {}'.format("???"))
+	screen.addstr(22,0,'Cantidad de clientes en espera (en la cola): {}'.format(sistema.cantidadActualClientesEnCola()))
+	screen.addstr(23,0,'Cantidad de mediciones: {}'.format(estadistica.cantMediciones))
+	screen.addstr(24,0,'Tiempo global: {}'.format(sistema.tiempoGlobal))
+	screen.addstr(26,0,'L: {}'.format(estadistica.L()))
+	screen.addstr(27,0,'Lq: {}'.format(estadistica.Lq()))
+	screen.addstr(26,50,'W: {}'.format(estadistica.W()))
+	screen.addstr(27,50,'Wq: {}'.format(estadistica.Wq()))
 		
 
-def actualizarEstadoServidores(screen,ocupado):
-	servidores = 100
+def actualizarEstadoServidores(screen,servidores):
+	#servidores = 100
 	fila = 1
 	columna = 7
-	for i in range(servidores):
-		if ocupado:
+
+	for servidor in servidores:
+		if servidor.estaOcupado():
 			screen.addstr(fila,columna,'X')
 		else: 
 			screen.addstr(fila,columna,' ')
@@ -51,25 +52,27 @@ def actualizarEstadoServidores(screen,ocupado):
 		else:
 			fila += 1
 
+
 def iniciar(screen):
 	#1) inicialización de variables	
 
 	arrayServidores = []
 	for i in range(100):
-		arrayServidores.append(5)
+		arrayServidores.append(20)
 
 	#2.1) crear instancia de estadistica
 	estadistica = TCparte2.Estadistica()
 
 	#2.2) crear instancia de sistema	
-	sistema = TP4P1.Sistema(0.5,arrayServidores)
+	sistema = TP4P1.Sistema(100,arrayServidores)
 
 	#3) llegada 1er. cliente
-	sistema.ingresoCliente()
+	#sistema.ingresoCliente()
+	sistema.crearEventoProximoCliente()
 
 	imprimirTitulo(screen)	
 
-	imprimirDatos(screen)
+	#imprimirDatos(screen, estadistica, sistema)
 	
 	terminar = False
 	
@@ -81,8 +84,10 @@ def iniciar(screen):
 
 		estadistica.procesar(sistema)	
 
-		actualizarEstadoServidores(screen,i % 2 == 0)
+		actualizarEstadoServidores(screen,sistema.listaServidores)
 		
+		imprimirDatos(screen, estadistica, sistema)
+
 		time.sleep(0.5)
 		
 		i += 1
